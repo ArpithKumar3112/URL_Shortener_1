@@ -58,13 +58,20 @@ func SetURL(ctx context.Context, key string) string {
 	return uuid
 }
 
-func GetURL(ctx context.Context, key string) string {
+func GetURL(ctx context.Context, key string) (string, error) {
 	val, err := client_redis.Get(ctx, key).Result()
+	fmt.Println(val)
+	if val == "" {
+		fmt.Println("URL does not exist")
+		return "", errors.New("url does not exist")
+	}
+
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return "", err
 	}
 	//fmt.Println("--VALUE--", val)
-	return val
+	return val, nil
 }
 
 func DeleteURL(ctx context.Context, key string) error {

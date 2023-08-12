@@ -37,12 +37,22 @@ func GetShortenURL(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	params := mux.Vars(r)
 	key := params["key"]
-	value := models.GetURL(timeoutContext, key)
-	fmt.Println(value)
-	w.Header().Set("Content-Type", "pkglication/json")
-	w.WriteHeader(http.StatusOK)
-	res, _ := json.Marshal(value)
-	w.Write(res)
+	url, err := models.GetURL(timeoutContext, key)
+	if err != nil {
+		if err.Error() == "url does not exist" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("URL does not exist"))
+			return
+		}
+		panic(err)
+	}
+	fmt.Println(url)
+	http.Redirect(w, r, url, http.StatusMovedPermanently)
+	//w.Header().Set("Content-Type", "pkglication/json")
+	//w.WriteHeader(http.StatusOK)
+	//w.Write([]byte("Redirecting to " + url))
+	//res, _ := json.Marshal(value)
+	//w.Write(res)
 }
 
 func DeleteShortenURL(w http.ResponseWriter, r *http.Request) {
